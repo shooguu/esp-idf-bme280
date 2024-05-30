@@ -194,81 +194,69 @@ void BME280::burst_read_data(
     humidity = (float)compensate_H_int32(humidity_adc) / 1024.0;
 }
 
-
-void BME280::pressure_oversample(
-    oversample_e os)
+void BME280::sample_data(
+    const uint8_t address,
+    const uint8_t &data)
 {
-    // Set the address
-    uint8_t address = CTRL_MEAS;
-
-    // Add new data to this variable
     uint8_t data_buffer = 0u;
 
     // read existing register data
     register_read(address, &data_buffer, 1u);
 
     // write new data
-    data_buffer |= ((uint8_t)os << PRESS_OVERSAMPLE_SHIFT);
+    data_buffer |= data;
 
     // write data over spi
     register_write(address, data_buffer);
+}
+
+void BME280::pressure_oversample(
+    oversample_e os)
+{
+    // write new data
+    uint8_t data = ((uint8_t)os << PRESS_OVERSAMPLE_SHIFT);
+
+    sample_data(CTRL_MEAS, data);
 }
 
 void BME280::humidity_oversample(
     oversample_e os)
 {
-    // Set the address
-    uint8_t address = CTRL_HUM;
-
-    // Add new data to this variable
-    uint8_t data_buffer = 0u;
-
-    // read existing register data
-    register_read(address, &data_buffer, 1u);
-
     // write new data
-    data_buffer |= ((uint8_t)os << HUM_OVERSAMPLE_SHIFT);
+    uint8_t data = ((uint8_t)os << HUM_OVERSAMPLE_SHIFT);
 
     // write data over spi
-    register_write(address, data_buffer);
+    register_write(CTRL_HUM, data);
 }
 
 void BME280::temperature_oversample(
     oversample_e os)
 {
-    // Set the address
-    uint8_t address = CTRL_MEAS;
-
-    // Add new data to this variable
-    uint8_t data_buffer = 0u;
-
-    // read existing register data
-    register_read(address, &data_buffer, 1u);
-
     // write new data
-    data_buffer |= ((uint8_t)os << TEMP_OVERSAMPLE_SHIFT);
+    uint8_t data = ((uint8_t)os << TEMP_OVERSAMPLE_SHIFT);
 
     // write data over spi
-    register_write(address, data_buffer);
+    register_write(CTRL_MEAS, data);
 }
 
 void BME280::set_force_mode(
     void)
 {
-    // Set the address
-    uint8_t address = CTRL_MEAS;
-
-    // Add new data to this variable
-    uint8_t data_buffer = 0u;
-
-    // read existing register data
-    register_read(address, &data_buffer, 1u);
-
     // write new data
-    data_buffer |= FORCED_MODE;
+    uint8_t data = FORCED_MODE;
 
     // write data over spi
-    register_write(address, data_buffer);
+    register_write(CTRL_MEAS, data);
+}
+
+void BME280::set_normal_mode(
+    void)
+{
+    // write new data
+    uint8_t data = NORMAL_MODE;
+
+    // write data over spi
+    register_write(CTRL_MEAS, data);
 }
 
 // Returns temperature in DegC, resolution is 0.01 DegC. Output value of “5123” equals 51.23 DegC.

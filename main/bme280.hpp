@@ -55,6 +55,7 @@
 #define REG_WRITE_ONLY  (~0x80)
 
 #define FORCED_MODE     (0x01)
+#define NORMAL_MODE     (0x03)
 
 typedef long signed int BME280_S32_t;
 typedef long unsigned int BME280_U32_t;
@@ -121,11 +122,18 @@ class BME280
         void set_force_mode(
             void);
 
+        void set_normal_mode(
+            void);
+
         float temperature;
         float pressure;
         float humidity;
 
     private:
+        void sample_data(
+            const uint8_t address,
+            const uint8_t &data);
+
         void register_read(
             const uint8_t address,
             uint8_t *buffer,

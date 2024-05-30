@@ -51,7 +51,7 @@ static spi_bus_config_t bus_cfg =
     .intr_flags = 0,
 };
 
-void task_500ms(void *pvParameters)
+void task_forced_mode(void *pvParameters)
 {
     spi_device_handle_t spi_dev;
     BME280 bme(dev_cfg, bus_cfg, spi_dev);
@@ -59,13 +59,13 @@ void task_500ms(void *pvParameters)
     bme.clear_all_registers();
 
     bme.pressure_oversample(
-        oversample_16x);
+        oversample_1x);
 
     bme.humidity_oversample(
-        oversample_16x);
+        oversample_1x);
 
     bme.temperature_oversample(
-        oversample_16x);
+        oversample_1x);
 
     for (;;)
     {
@@ -81,11 +81,41 @@ void task_500ms(void *pvParameters)
     }
 }
 
+void task_normal_mode(void *pvParameters)
+{
+    spi_device_handle_t spi_dev;
+    BME280 bme(dev_cfg, bus_cfg, spi_dev);
+
+    bme.clear_all_registers();
+
+    bme.pressure_oversample(
+        oversample_16x);
+
+    bme.humidity_oversample(
+        oversample_16x);
+
+    bme.temperature_oversample(
+        oversample_16x);
+
+    bme.set_normal_mode();
+
+    for (;;)
+    {
+        bme.burst_read_data();
+
+        printf("Temperature: %f\n", bme.temperature);
+        printf("Pressure: %f\n", bme.pressure);
+        printf("Humidity: %f\n", bme.humidity);
+
+        vTaskDelay(250u / portTICK_PERIOD_MS);
+    }
+}
+
 void app_main(void)
 {
     // Create task
-    xTaskCreate(task_500ms,
-                "task_500ms",
+    xTaskCreate(task_normal_mode,
+                "task_normal_mode",
                 4096u,
                 NULL,
                 1u,
